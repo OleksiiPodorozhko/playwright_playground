@@ -55,3 +55,37 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Visual Studio
+.vs/
+
+# Rider / JetBrains (раптом відкриєш проект у Rider)
+.idea/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Playwright artifacts
+playwright-report/
+test-results/
+
+# Screenshots / videos / traces
+**/screenshots/
+**/videos/
+**/traces/
+
+# Coverage
+coverage/
+coverage-results/
+*.coverage
+*.coveragexml
+
+# Local configuration overrides
+appsettings.local.json
+
+# OS files
+.DS_Store
+Thumbs.db
