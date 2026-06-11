@@ -1,4 +1,5 @@
 name: Playwright Tests
+
 on:
   push:
     branches: [ main, master ]
@@ -19,36 +20,39 @@ on:
         description: "dotnet test filter to run."
         required: false
         default: ""
+
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    
+
+    defaults:
+      run:
+        working-directory: src/Automation
+
     env:
-      TEST_ENV: ${{ github.event.inputs.env || 'test' }}
-    
+      TEST_ENV: ${{ inputs.env || 'test' }}
+      TEST_FILTER: ${{ inputs.filters || '' }}
+
     steps:
       - uses: actions/checkout@v5
-        
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
-          
+
       - name: Restore dependencies
         run: dotnet restore Automation.slnx
-        
+
       - name: Build
         run: dotnet build Automation.slnx --configuration Debug --no-restore
 
-      - name: Ensure Playwright browsers are installed
+      - name: Install Playwright browsers
         run: pwsh Automation.Tests/bin/Debug/net10.0/playwright.ps1 install --with-deps
-        
-      - name: Ensure Playwright browsers are installed
-        run: pwsh Automation.Tests/bin/Debug/net10.0/playwright.ps1 install --with-deps
-        
+
       - name: Run all Playwright tests
-        if: ${{ github.event.inputs.filters == '' || github.event.inputs.filters == null }}
+        if: ${{ env.TEST_FILTER == '' }}
         run: >
           dotnet test Automation.Tests/Automation.Tests.csproj
           --configuration Debug
@@ -57,14 +61,14 @@ jobs:
           --logger "trx"
           --results-directory TestResults
 
-      - name: Run selected Playwright test fixtures
-        if: ${{ github.event.inputs.filters != '' && github.event.inputs.filters != null }}
+      - name: Run selected Playwright tests
+        if: ${{ env.TEST_FILTER != '' }}
         run: >
           dotnet test Automation.Tests/Automation.Tests.csproj
           --configuration Debug
           --no-build
           --settings runsettings/ci.chromium.headless.runsettings
-          --filter "${{ github.event.inputs.filters }}"
+          --filter "${{ env.TEST_FILTER }}"
           --logger "trx"
           --results-directory TestResults
 
@@ -74,6 +78,6 @@ jobs:
         with:
           name: test-results-${{ env.TEST_ENV }}
           path: |
-            TestResults
-            Automation.Tests/TestResults
-            Automation.Tests/bin/Debug/net10.0/test-results
+            src/Automation/TestResults
+            src/Automation/Automation.Tests/TestResults
+            src/Automation/Automation.Tests/bin/Debug/net10.0/test-results
