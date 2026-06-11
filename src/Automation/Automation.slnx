@@ -1,3 +1,7 @@
 <Solution>
+  <Project Path="Automation.Api/Automation.Api.csproj" />
+  <Project Path="Automation.Core/Automation.Core.csproj" />
+  <Project Path="Automation.Playwright/Automation.Playwright.csproj" />
   <Project Path="Automation.Tests/Automation.Tests.csproj" />
+  <Project Path="Automation.WebApp/Automation.WebApp.csproj" />
 </Solution>
