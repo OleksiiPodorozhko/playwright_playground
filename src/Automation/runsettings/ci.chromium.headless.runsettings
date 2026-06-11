@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <Playwright>
+    <BrowserName>chromium</BrowserName>
+    <ExpectTimeout>5000</ExpectTimeout>
+
+    <LaunchOptions>
+      <Headless>true</Headless>
+    </LaunchOptions>
+
+    <ContextOptions>
+      <ViewportSize>
+        <Width>1920</Width>
+        <Height>1080</Height>
+      </ViewportSize>
+      <RecordVideoDir>TestResults/videos</RecordVideoDir>
+    </ContextOptions>
+  </Playwright>
+
+  <LoggerRunSettings>
+    <Loggers>
+      <Logger friendlyName="trx" enabled="True" />
+    </Loggers>
+  </LoggerRunSettings>
+</RunSettings>
