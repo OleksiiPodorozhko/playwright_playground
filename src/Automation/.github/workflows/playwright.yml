@@ -1,0 +1,79 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Target environment"
+        required: true
+        default: "test"
+        type: choice
+        options:
+          - test
+          - stage
+          - prod
+      filters:
+        description: "dotnet test filter to run."
+        required: false
+        default: ""
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    
+    env:
+      TEST_ENV: ${{ github.event.inputs.env || 'test' }}
+    
+    steps:
+      - uses: actions/checkout@v5
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+          
+      - name: Restore dependencies
+        run: dotnet restore Automation.slnx
+        
+      - name: Build
+        run: dotnet build Automation.slnx --configuration Debug --no-restore
+
+      - name: Ensure Playwright browsers are installed
+        run: pwsh Automation.Tests/bin/Debug/net10.0/playwright.ps1 install --with-deps
+        
+      - name: Ensure Playwright browsers are installed
+        run: pwsh Automation.Tests/bin/Debug/net10.0/playwright.ps1 install --with-deps
+        
+      - name: Run all Playwright tests
+        if: ${{ github.event.inputs.filters == '' || github.event.inputs.filters == null }}
+        run: >
+          dotnet test Automation.Tests/Automation.Tests.csproj
+          --configuration Debug
+          --no-build
+          --settings runsettings/ci.chromium.headless.runsettings
+          --logger "trx"
+          --results-directory TestResults
+
+      - name: Run selected Playwright test fixtures
+        if: ${{ github.event.inputs.filters != '' && github.event.inputs.filters != null }}
+        run: >
+          dotnet test Automation.Tests/Automation.Tests.csproj
+          --configuration Debug
+          --no-build
+          --settings runsettings/ci.chromium.headless.runsettings
+          --filter "${{ github.event.inputs.filters }}"
+          --logger "trx"
+          --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ env.TEST_ENV }}
+          path: |
+            TestResults
+            Automation.Tests/TestResults
+            Automation.Tests/bin/Debug/net10.0/test-results
